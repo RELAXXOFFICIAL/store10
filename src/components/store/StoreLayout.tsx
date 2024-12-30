@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, Outlet, useNavigate } from 'react-router-dom';
 import { ShoppingCart, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import CartDrawer from '../cart/CartDrawer';
 import toast from 'react-hot-toast';
 import { supabase } from '../../lib/supabase';
+import { useTheme } from '../../contexts/ThemeContext';
 
 export default function StoreLayout() {
   const { session, signOut } = useAuth();
@@ -12,6 +13,7 @@ export default function StoreLayout() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
+  const { currentTheme } = useTheme();
 
   useEffect(() => {
     if (session?.user) {
@@ -43,13 +45,17 @@ export default function StoreLayout() {
     }
   };
 
+  const bgColor = currentTheme?.base_colors?.primary || 'bg-white';
+  const textColor = currentTheme?.base_colors?.text || 'text-gray-900';
+  const background = currentTheme?.base_colors?.background || 'bg-gray-50';
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
+    <div className="min-h-screen" style={{ backgroundColor: background }}>
+      <nav className={`shadow-sm ${bgColor}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className="text-xl font-bold text-gray-900">
+              <Link to="/" className={`text-xl font-bold ${textColor}`}>
                 Store
               </Link>
             </div>

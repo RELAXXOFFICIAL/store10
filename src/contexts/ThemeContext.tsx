@@ -32,9 +32,27 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const fetchThemes = async () => {
     try {
       const data = await themeService.fetchThemes();
-      setThemes(data);
-      const activeTheme = data.find(theme => theme.is_active);
-      if (activeTheme) setCurrentTheme(activeTheme);
+      if (data.length === 0) {
+        const defaultTheme = {
+          name: 'Default Theme',
+          is_active: true,
+          base_colors: {
+            primary: '#007bff',
+            secondary: '#6c757d',
+            accent: '#28a745',
+            background: '#f8f9fa',
+            text: '#343a40',
+          },
+        };
+        const createdTheme = await themeService.createTheme(defaultTheme);
+        const activeTheme = await themeService.setActiveTheme(createdTheme.id);
+        setThemes([activeTheme]);
+        setCurrentTheme(activeTheme);
+      } else {
+        setThemes(data);
+        const activeTheme = data.find(theme => theme.is_active);
+        if (activeTheme) setCurrentTheme(activeTheme);
+      }
     } catch (error) {
       toast.error('Failed to fetch themes');
     } finally {

@@ -9,6 +9,7 @@ import LoadingSpinner from './components/common/LoadingSpinner';
 import ProtectedRoute from './components/ProtectedRoute';
 import Layout from './components/Layout';
 import StoreLayout from './components/store/StoreLayout';
+import Promotions from './pages/admin/Promotions';
 
 // Lazy load routes
 const Login = React.lazy(() => import('./pages/Login'));
@@ -50,6 +51,7 @@ export default function App() {
                     <Route path="/products" element={<Products />} />
                     <Route path="/orders" element={<Orders />} />
                     <Route path="/themes" element={<Themes />} />
+                    <Route path="/promotions" element={<React.Suspense fallback={<LoadingSpinner />}><Promotions /></React.Suspense>} />
                   </Route>
                 </Routes>
               </Suspense>

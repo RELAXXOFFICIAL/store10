@@ -39,7 +39,7 @@ export async function setActiveTheme(id: string) {
   // First, deactivate all themes
   const { error: deactivateError } = await supabase
     .from('color_themes')
-    .update({ is_active: false })
+    .update({ is_active: false, 'Content-Type': 'application/json' })
     .neq('id', id);
 
   if (deactivateError) throw deactivateError;

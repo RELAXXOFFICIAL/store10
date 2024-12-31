@@ -1,11 +1,9 @@
-import React, { useState } from 'react';
-import { HexColorPicker } from 'react-colorful';
-import { Palette, EyeOff, Check, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { EyeOff, AlertTriangle } from 'lucide-react';
 import { ColorTheme } from '../../lib/theme/types';
-import { DEFAULT_THEME, COLOR_PRESETS } from '../../lib/theme/constants';
+import { COLOR_PRESETS } from '../../lib/theme/constants';
 import { generateColorPalette, checkAccessibility, generateComplementaryColors } from '../../lib/theme/colorUtils';
 import ColorPicker from './ColorPicker';
-import GradientBuilder from './GradientBuilder';
 import ThemePreview from './ThemePreview';
 
 interface ThemeEditorProps {
@@ -20,13 +18,14 @@ export default function ThemeEditor({ theme, onChange, onSave }: ThemeEditorProp
   const [showA11yWarnings, setShowA11yWarnings] = useState(true);
 
   const updateColor = (key: string, value: string) => {
+    const palette = generateColorPalette(value);
     onChange({
       ...theme,
       base_colors: {
         ...theme.base_colors,
         [key]: value,
-        [`${key}-light`]: generateColorPalette(value).light,
-        [`${key}-dark`]: generateColorPalette(value).dark
+        [`${key}-light`]: palette.light,
+        [`${key}-dark`]: palette.dark
       }
     });
   };
@@ -104,7 +103,10 @@ export default function ThemeEditor({ theme, onChange, onSave }: ThemeEditorProp
                   <div key={key} className="relative">
                     <ColorPicker
                       color={value}
-                      onChange={(color) => updateColor(key, color)}
+                      onChange={(color) => {
+                        updateColor(key, color);
+                        setSelectedColor(color);
+                      }}
                       label={key.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                     />
                     {showA11yWarnings && !a11yInfo.isAccessible && (
@@ -115,6 +117,16 @@ export default function ThemeEditor({ theme, onChange, onSave }: ThemeEditorProp
                   </div>
                 );
               })}
+              <div key="shadow" className="relative">
+                <ColorPicker
+                  color={theme.base_colors.shadow}
+                   onChange={(color) => {
+                    updateColor('shadow', color);
+                    setSelectedColor(color);
+                  }}
+                  label="Shadow"
+                />
+              </div>
             </div>
 
             <div className="mt-6">
@@ -167,9 +179,9 @@ export default function ThemeEditor({ theme, onChange, onSave }: ThemeEditorProp
             <div>
               <h4 className="text-sm font-medium text-gray-700 mb-2">Palette</h4>
               <div className="grid grid-cols-5 gap-2">
-                {Object.entries(generateColorPalette(selectedColor)).map(([name, color]) => (
+                {Object.values(generateColorPalette(selectedColor)).filter(color => typeof color === 'string').map((color, i) => (
                   <div
-                    key={name}
+                    key={i}
                     className="h-8 rounded-md"
                     style={{ backgroundColor: color }}
                   />

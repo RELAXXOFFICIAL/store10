@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -31,7 +31,7 @@ const productSchema = z.object({
 type ProductFormData = z.infer<typeof productSchema>;
 
 interface ProductFormProps {
-  initialData?: Partial<ProductFormData>;
+  initialData?: Partial<ProductFormData> & { images?: string[] };
   onSubmit: (data: ProductFormData & { images: string[] }) => Promise<void>;
   onCancel: () => void;
 }
@@ -72,18 +72,44 @@ export default function ProductForm({ initialData, onSubmit, onCancel }: Product
         const filePath = `${fileName}`;
 
         // Upload to Supabase Storage
-        const { error: uploadError, data } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('product-images')
           .upload(filePath, file, {
             cacheControl: '3600',
             upsert: false,
-            onUploadProgress: (progress) => {
-              setUploadProgress(prev => ({
-                ...prev,
-                [fileName]: (progress.loaded / progress.total) * 100
-              }));
-            }
           });
+        
+        if (uploadError) {
+          toast.error(`Error uploading ${file.name}`);
+          continue;
+        }
+
+        const { data } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        setUploadProgress(prev => ({
+          ...prev,
+          [fileName]: data?.progress || 0
+        }));
+        
+        if (uploadError) {
+          toast.error(`Error uploading ${file.name}`);
+          continue;
+        }
+        
+        if (uploadError) {
+          toast.error(`Error uploading ${file.name}`);
+          continue;
+        }
+
+        if (uploadError) {
+          toast.error(`Error uploading ${file.name}`);
+          continue;
+        }
 
         if (uploadError) {
           toast.error(`Error uploading ${file.name}`);
@@ -111,7 +137,9 @@ export default function ProductForm({ initialData, onSubmit, onCancel }: Product
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/*': ACCEPTED_IMAGE_TYPES
+      'image/jpeg': ['.jpeg', '.jpg'],
+      'image/png': ['.png'],
+      'image/webp': ['.webp'],
     },
     maxSize: MAX_FILE_SIZE,
     disabled: uploading
@@ -140,6 +168,7 @@ export default function ProductForm({ initialData, onSubmit, onCancel }: Product
   };
 
   const handleFormSubmit = async (data: ProductFormData) => {
+    console.log('Form data:', data);
     if (images.length === 0) {
       toast.error('At least one image is required');
       return;
@@ -147,6 +176,12 @@ export default function ProductForm({ initialData, onSubmit, onCancel }: Product
 
     await onSubmit({ ...data, images });
   };
+
+  // Log form values
+  useEffect(() => {
+    const subscription = watch((value) => console.log('Form values:', value));
+    return () => subscription.unsubscribe();
+  }, [watch]);
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">

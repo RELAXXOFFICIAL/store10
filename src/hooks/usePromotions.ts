@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { Database } from '../lib/database.types';
 
-type ProductDiscount = Database['public']['Tables']['product_discounts']['Row'];
-type PopupPromotion = Database['public']['Tables']['popup_promotions']['Row'];
+export type ProductDiscount = Database['public']['Tables']['product_discounts']['Row'];
+export type PopupPromotion = Database['public']['Tables']['popup_promotions']['Row'];
 
 export function usePromotions() {
   const [discounts, setDiscounts] = useState<ProductDiscount[]>([]);

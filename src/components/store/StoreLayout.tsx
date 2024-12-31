@@ -1,61 +1,46 @@
-import { useState, useEffect } from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { Link, Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { ShoppingCart, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import CartDrawer from '../cart/CartDrawer';
 import toast from 'react-hot-toast';
-import { supabase } from '../../lib/supabase';
 import { useTheme } from '../../contexts/ThemeContext';
 
 export default function StoreLayout() {
-  const { session, signOut } = useAuth();
+  const { isAuthenticated, logout } = useAuth();
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const { currentTheme } = useTheme();
+  const location = useLocation();
 
-  useEffect(() => {
-    if (session?.user) {
-      checkAdminRole();
-    }
-  }, [session]);
 
-  const checkAdminRole = async () => {
-    try {
-      const { data: profile } = await supabase
-        .from('user_profiles')
-        .select('role')
-        .eq('user_id', session?.user.id)
-        .single();
-      
-      setIsAdmin(profile?.role === 'admin');
-    } catch (error) {
-      console.error('Error checking admin role:', error);
-    }
+  const handleSignOut = () => {
+    logout();
+    toast.success('Signed out successfully');
+    navigate('/');
   };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast.success('Signed out successfully');
-      navigate('/');
-    } catch (error) {
-      toast.error('Failed to sign out');
-    }
-  };
-
-  const bgColor = currentTheme?.base_colors?.primary || 'bg-white';
-  const textColor = currentTheme?.base_colors?.text || 'text-gray-900';
-  const background = currentTheme?.base_colors?.background || 'bg-gray-50';
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: background }}>
-      <nav className={`shadow-sm ${bgColor}`}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: currentTheme
+          ? `linear-gradient(to bottom right, ${currentTheme.base_colors.primary}, ${currentTheme.base_colors.secondary})`
+          : 'white',
+        color: currentTheme?.base_colors?.text || 'black',
+      }}
+    >
+      <nav
+        className="shadow-sm"
+        style={{
+          backgroundColor: currentTheme?.base_colors?.background || 'white',
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
             <div className="flex items-center">
-              <Link to="/" className={`text-xl font-bold ${textColor}`}>
+              <Link to="/" className={`text-xl font-bold ${location.pathname === '/' ? 'underline' : ''}`} style={{ color: currentTheme?.base_colors?.text || 'black' }}>
                 Store
               </Link>
             </div>
@@ -66,7 +51,7 @@ export default function StoreLayout() {
               >
                 <ShoppingCart className="h-6 w-6" />
               </button>
-              {session ? (
+              {isAuthenticated ? (
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
@@ -83,15 +68,6 @@ export default function StoreLayout() {
                       >
                         Account
                       </Link>
-                      {isAdmin && (
-                        <Link
-                          to="/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setShowUserMenu(false)}
-                        >
-                          Admin Dashboard
-                        </Link>
-                      )}
                       <button
                         onClick={() => {
                           handleSignOut();

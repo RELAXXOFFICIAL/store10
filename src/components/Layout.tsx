@@ -12,28 +12,38 @@ const navItems = [
 ];
 
 export default function Layout() {
-  const location = useLocation();
-  const { signOut, user } = useAuth();
+  const { logout } = useAuth();
   const { currentTheme } = useTheme();
-
-  const bgColor = currentTheme?.base_colors?.primary || 'bg-white';
-  const textColor = currentTheme?.base_colors?.text || 'text-gray-700';
+  const location = useLocation();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: currentTheme?.base_colors?.background }}>
-      <nav className={`shadow-md fixed w-64 h-full ${bgColor}`}>
+    <div
+      className="min-h-screen"
+      style={{
+        background: currentTheme
+          ? `linear-gradient(to bottom right, ${currentTheme.base_colors.primary}, ${currentTheme.base_colors.secondary})`
+          : 'white',
+        color: currentTheme?.base_colors?.text || 'black',
+      }}
+    >
+      <nav
+        className="shadow-md fixed w-64 h-full"
+        style={{
+          backgroundColor: currentTheme?.base_colors?.background || 'white',
+        }}
+      >
         <div className="p-4">
-          <h1 className={`text-xl font-bold ${textColor}`}>Admin Panel</h1>
-          <p className="text-sm text-gray-600">{user?.email}</p>
+          <h1 className="text-xl font-bold" style={{ color: currentTheme?.base_colors?.text || 'black' }}>Admin Panel</h1>
         </div>
         <ul className="mt-6">
           {navItems.map(({ path, icon: Icon, label }) => (
             <li key={path}>
               <Link
                 to={path}
-                className={`flex items-center px-6 py-3 ${textColor} hover:bg-gray-100 ${
+                className={`flex items-center px-6 py-3 hover:bg-gray-100 ${
                   location.pathname === path ? 'bg-gray-100' : ''
                 }`}
+                style={{ color: currentTheme?.base_colors?.text || 'black' }}
               >
                 <Icon className="w-5 h-5 mr-3" />
                 {label}
@@ -42,8 +52,9 @@ export default function Layout() {
           ))}
           <li>
             <button
-              onClick={() => signOut()}
-              className={`w-full flex items-center px-6 py-3 ${textColor} hover:bg-gray-100`}
+              onClick={() => logout()}
+              className="w-full flex items-center px-6 py-3 hover:bg-gray-100"
+              style={{ color: currentTheme?.base_colors?.text || 'black' }}
             >
               <LogOut className="w-5 h-5 mr-3" />
               Sign Out

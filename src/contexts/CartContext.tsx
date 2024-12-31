@@ -1,7 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { supabase } from '../lib/supabase';
-import { useAuth } from './AuthContext';
-import toast from 'react-hot-toast';
+import React, { createContext, useContext, useState } from 'react';
 
 interface CartItem {
   id: string;
@@ -27,112 +24,22 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
-
-  useEffect(() => {
-    if (user) {
-      fetchCart();
-    } else {
-      setItems([]);
-      setLoading(false);
-    }
-  }, [user]);
-
-  const fetchCart = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cart_items')
-        .select(`
-          id,
-          product_id,
-          quantity,
-          product:products (
-            name,
-            price,
-            images
-          )
-        `)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      setItems(data || []);
-    } catch (error) {
-      toast.error('Failed to fetch cart');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [items] = useState<CartItem[]>([]);
 
   const addItem = async (productId: string, quantity = 1) => {
-    if (!user) {
-      toast.error('Please sign in to add items to cart');
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .upsert({
-          user_id: user.id,
-          product_id: productId,
-          quantity: quantity
-        }, {
-          onConflict: 'user_id,product_id'
-        });
-
-      if (error) throw error;
-      await fetchCart();
-      toast.success('Added to cart');
-    } catch (error) {
-      toast.error('Failed to add item to cart');
-    }
+    console.log('add item', productId, quantity);
   };
 
   const removeItem = async (itemId: string) => {
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('id', itemId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      await fetchCart();
-      toast.success('Item removed from cart');
-    } catch (error) {
-      toast.error('Failed to remove item');
-    }
+    console.log('remove item', itemId);
   };
 
   const updateQuantity = async (itemId: string, quantity: number) => {
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .update({ quantity })
-        .eq('id', itemId)
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      await fetchCart();
-    } catch (error) {
-      toast.error('Failed to update quantity');
-    }
+    console.log('update quantity', itemId, quantity);
   };
 
   const clearCart = async () => {
-    try {
-      const { error } = await supabase
-        .from('cart_items')
-        .delete()
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-      setItems([]);
-    } catch (error) {
-      toast.error('Failed to clear cart');
-    }
+    console.log('clear cart');
   };
 
   const total = items.reduce((sum, item) => {
@@ -146,7 +53,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       removeItem,
       updateQuantity,
       clearCart,
-      loading,
+      loading: false,
       total
     }}>
       {children}

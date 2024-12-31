@@ -1,4 +1,4 @@
-import React from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { ShoppingCart } from 'lucide-react';
 import type { Database } from '../../lib/database.types';
 import ProductImage from '../products/ProductImage';
@@ -11,8 +11,12 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart }: ProductCardProps) {
+  const { currentTheme } = useTheme();
+  const backgroundColor = currentTheme?.base_colors?.background || 'bg-white';
+  const shadowColor = currentTheme?.base_colors?.shadow || 'shadow-md';
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden">
+    <div className={`${backgroundColor} rounded-lg ${shadowColor} overflow-hidden`}>
       <div className="aspect-w-1 aspect-h-1 w-full">
         {product.images?.[0] ? (
           <ProductImage

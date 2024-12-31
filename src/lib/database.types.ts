@@ -2,7 +2,17 @@
 export interface Database {
   public: {
     Tables: {
-      // ... existing tables ...
+      products: {
+        Row: {
+          id: string;
+          name: string;
+          description: string | null;
+          price: number;
+          images: string[] | null;
+          created_at: string;
+          updated_at: string;
+        };
+      };
       product_discounts: {
         Row: {
           id: string;

@@ -1,59 +1,36 @@
-import { supabase } from '../lib/supabase';
 import { ColorTheme } from '../lib/theme/types';
 import { generateThemeCSS } from '../lib/theme/utils';
 
 export async function fetchThemes() {
-  const { data, error } = await supabase
-    .from('color_themes')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return data;
+  console.log('fetchThemes');
+  return [{
+    id: '1',
+    name: 'Default Theme',
+    is_active: true,
+    version: 1,
+    base_colors: {
+      primary: '#007bff',
+      secondary: '#6c757d',
+      accent: '#28a745',
+      background: '#f8f9fa',
+      text: '#343a40',
+    },
+  }];
 }
 
 export async function createTheme(theme: Partial<ColorTheme>) {
-  const { data, error } = await supabase
-    .from('color_themes')
-    .insert([theme])
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  console.log('createTheme', theme);
+  return { ...theme, id: '1', is_active: false, version: 1, base_colors: { primary: '#007bff', secondary: '#6c757d', accent: '#28a745', background: '#f8f9fa', text: '#343a40' } };
 }
 
 export async function updateTheme(id: string, updates: Partial<ColorTheme>) {
-  const { data, error } = await supabase
-    .from('color_themes')
-    .update(updates)
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+  console.log('updateTheme', id, updates);
+  return { ...updates, id };
 }
 
 export async function setActiveTheme(id: string) {
-  // First, deactivate all themes
-  const { error: deactivateError } = await supabase
-    .from('color_themes')
-    .update({ is_active: false, 'Content-Type': 'application/json' })
-    .neq('id', id);
-
-  if (deactivateError) throw deactivateError;
-
-  // Then, activate the selected theme
-  const { data, error } = await supabase
-    .from('color_themes')
-    .update({ is_active: true })
-    .eq('id', id)
-    .select()
-    .single();
-
-  if (error) throw error;
-  return data;
+    console.log('setActiveTheme', id);
+    return { id, is_active: true, name: 'Default Theme', version: 1, base_colors: { primary: '#007bff', secondary: '#6c757d', accent: '#28a745', background: '#f8f9fa', text: '#343a40' } };
 }
 
 export function applyTheme(theme: ColorTheme) {

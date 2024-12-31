@@ -10,6 +10,7 @@ export interface ColorTheme {
     accent: string;
     background: string;
     text: string;
+    shadow: string;
     [key: string]: string;
   };
   gradients?: Array<{

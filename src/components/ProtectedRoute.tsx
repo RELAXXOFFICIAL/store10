@@ -7,10 +7,10 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ children }: ProtectedRouteProps) {
-  const { session } = useAuth();
+  const { isAuthenticated } = useAuth();
 
-  if (!session) {
-    // Redirect to login if there's no session
+  if (!isAuthenticated) {
+    // Redirect to login if not authenticated
     return <Navigate to="/login" replace />;
   }
 
